@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Classroom Seat Arrangement</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      padding: 30px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+    }
+
+    .controls input {
+      width: 50px;
+      padding: 5px;
+      margin: 0 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .controls button {
+      padding: 6px 12px;
+      margin-left: 10px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      background: #45a049;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(9, 80px); /* 7 seats + 2 gaps */
+      gap: 8px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    .seat {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty {
+      color: #ccc;
+    }
+
+    .gap {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🪑 Exam Seat Arranger</h2>
+
+  <div class="controls">
+    A: <input type="number" id="countA" value="10" min="0">
+    B: <input type="number" id="countB" value="9" min="0">
+    C: <input type="number" id="countC" value="10" min="0">
+    <button onclick="generateLayout()">Generate</button>
+  </div>
+
+  <div id="layout"></div>
+
+  <script>
+    function isValidRow(row) {
+      for (let i = 0; i < 6; i++) {
+        if (row[i] && row[i] === row[i + 1]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    function generateLayout() {
+      const countA = parseInt(document.getElementById('countA').value);
+      const countB = parseInt(document.getElementById('countB').value);
+      const countC = parseInt(document.getElementById('countC').value);
+
+      let students = Array(countA).fill('A')
+        .concat(Array(countB).fill('B'))
+        .concat(Array(countC).fill('C'));
+
+      students = students.concat(Array(35 - students.length).fill(''));
+
+      let layout = [];
+      let attempts = 0;
+
+      while (attempts < 10000) {
+        attempts++;
+        shuffle(students);
+        layout = Array.from({ length: 5 }, (_, i) => students.slice(i * 7, (i + 1) * 7));
+        if (layout.every(isValidRow)) break;
+      }
+
+      displayLayout(layout);
+    }
+
+    function displayLayout(layout) {
+      const container = document.getElementById('layout');
+      container.innerHTML = '';
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+
+      layout.forEach(row => {
+        row.forEach((seat, i) => {
+          const cell = document.createElement('div');
+          cell.className = 'seat' + (seat === '' ? ' empty' : '');
+          cell.textContent = seat ? `🪑 ${seat}` : '🪑';
+          grid.appendChild(cell);
+
+          if (i === 1 || i === 4) {
+            const spacer = document.createElement('div');
+            spacer.className = 'seat gap';
+            grid.appendChild(spacer);
+          }
+        });
+      });
+
+      container.appendChild(grid);
+    }
+  </script>
+
+</body>
+</html>
